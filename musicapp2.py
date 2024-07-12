@@ -86,7 +86,7 @@ def display_menu(user):
         print("0. Logout")
 
         choice = input("Enter your choice: ")
-
+#Available options and matching with if statement against user input.
         if choice == '1':
             view_files()
         elif choice == '2':
