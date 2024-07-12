@@ -80,7 +80,7 @@ def delete_file(user):
 def display_menu(user):
     while True:
         print("\nMenu:")
-        print("1. View Files")
+        print("1. View Artefacts")
         print("2. Upload File")
         print("3. Delete File")
         print("0. Logout")
