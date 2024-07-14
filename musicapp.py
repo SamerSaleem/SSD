@@ -15,7 +15,7 @@ users = {
 # File storage with metadata.
 files = []
 
-# AES key must be 16, 24, or 32 bytes long
+# AES key must be 16, 24, or 32 bytes long to encrypt files with AES
 aes_key = b'sixteen byte key'
 
 # Function to prompt authenticated users to match against the list of allowed users defined above.
