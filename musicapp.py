@@ -1,7 +1,10 @@
-import os  # https://docs.python.org/3/library/os.html
-import hashlib  # https://docs.python.org/3/library/hashlib.html
-from datetime import datetime  # https://docs.python.org/3/library/datetime.html
-import subprocess  # Import subprocess to run external commands
+import os
+import hashlib
+from datetime import datetime
+import subprocess
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 
 # In-memory user database will be used to authenticate against and have two different roles.
 users = {
@@ -11,6 +14,9 @@ users = {
 
 # File storage with metadata.
 files = []
+
+# AES key must be 16, 24, or 32 bytes long
+aes_key = b'sixteen byte key'
 
 # Function to prompt authenticated users to match against the list of allowed users defined above.
 def authenticate(username, password):
@@ -30,6 +36,37 @@ def generate_md5(filename):
     except FileNotFoundError:
         print(f"File '{filename}' not found.")
         return None
+
+# Function to encrypt a file using AES
+def encrypt_file(filename):
+    try:
+        with open(filename, 'rb') as file:
+            file_data = file.read()
+        cipher = AES.new(aes_key, AES.MODE_CBC)
+        encrypted_data = cipher.iv + cipher.encrypt(pad(file_data, AES.block_size))
+        with open(filename, 'wb') as file:
+            file.write(encrypted_data)
+        print(f"File '{filename}' encrypted successfully.")
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+    except Exception as e:
+        print(f"An error occurred while encrypting the file: {e}")
+
+# Function to decrypt a file using AES
+def decrypt_file(filename):
+    try:
+        with open(filename, 'rb') as file:
+            encrypted_data = file.read()
+        iv = encrypted_data[:AES.block_size]
+        cipher = AES.new(aes_key, AES.MODE_CBC, iv)
+        decrypted_data = unpad(cipher.decrypt(encrypted_data[AES.block_size:]), AES.block_size)
+        with open(filename, 'wb') as file:
+            file.write(decrypted_data)
+        print(f"File '{filename}' decrypted successfully.")
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+    except Exception as e:
+        print(f"An error occurred while decrypting the file: {e}")
 
 # Function to handle viewing files
 def view_files():
@@ -51,13 +88,22 @@ def open_file_option():
         if 1 <= file_idx <= len(files):
             file_to_open = files[file_idx - 1]
             filename = file_to_open['filename']
+            decrypt_option = input("Decrypt the file before opening? (y/n): ").strip().lower()
+            if decrypt_option == 'y':
+                decrypt_file(filename)
             filepath = os.path.abspath(filename)
             if filename.endswith('.mp3'):
+                print(f"Opening {filepath} with QuickTime Player...")
                 subprocess.run(['open', '-a', 'QuickTime Player', filepath])  # For MacOS
             elif filename.endswith('.txt'):
+                print(f"Opening {filepath} with TextEdit...")
                 subprocess.run(['open', '-a', 'TextEdit', filepath])  # For MacOS
             else:
                 print("Unsupported file type.")
+            if decrypt_option == 'y':
+                re_encrypt_option = input("Re-encrypt the file after closing? (y/n): ").strip().lower()
+                if re_encrypt_option == 'y':
+                    encrypt_file(filename)
         else:
             print("Invalid file number.")
     except ValueError:
@@ -69,6 +115,9 @@ def upload_file(user):
     if not os.path.isfile(filename):
         print(f"File '{filename}' does not exist.")
         return
+    encrypt_option = input("Encrypt the file? (y/n): ").strip().lower()
+    if encrypt_option == 'y':
+        encrypt_file(filename)
     generate_checksum = input("Generate MD5 checksum? (y/n): ").strip().lower()
     checksum = generate_md5(filename) if generate_checksum == 'y' else "N/A"
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
