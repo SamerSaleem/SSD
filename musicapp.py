@@ -1,10 +1,10 @@
-import os
-import hashlib
-from datetime import datetime
-import subprocess
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Random import get_random_bytes
+import os # local libraryhttps://docs.python.org/3/library/os.html
+import hashlib # https://docs.python.org/3/library/hashlib.html
+from datetime import datetime # https://docs.python.org/3/library/datetime.html
+import subprocess # Import subprocess to run external commands from the system
+from Crypto.Cipher import AES # encryption library install pycryptodome 
+from Crypto.Util.Padding import pad, unpad # encryption library install pycryptodome 
+from Crypto.Random import get_random_bytes # encryption library install pycryptodome 
 
 # In-memory user database will be used to authenticate against and have two different roles.
 users = {
