@@ -23,8 +23,7 @@ This is a simple command-line application for managing and viewing files with ba
    cd SSD
 
 2. pip install pycryptodome
-3. run the code in your local computer python3.10 musicapp.py
-
+3. run the code in your local computer  #python3.10 musicapp.py
 4. Authentication
 You will be prompted to enter your username and password. The default credentials are:
 
